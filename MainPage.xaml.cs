@@ -1,4 +1,7 @@
-﻿using System;
+﻿using MessengerRandomizerMappingGenerator.RandomizerGeneration;
+using MessengerRandomizerMappingGenerator.RandomizerGeneration.Constants;
+using MessengerRandomizerMappingGenerator.RandomizerGeneration.RO;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -50,14 +53,36 @@ namespace MessengerRandomizerMappingGenerator
 
             CheckBox logicEngineCheckBox = (CheckBox)FindName("LogicalEngineCheckBox");
             RadioButton basicRadial = (RadioButton)FindName("BasicRadial");
-            RadioButton advRadial = (RadioButton)FindName("AdvancedRadial");
             
             this.text += $"Using logic engine: '{logicEngineCheckBox.IsChecked}'\n";
             this.text += $"Is a basic seed: '{basicRadial.IsChecked}'\n";
-            this.text += $"Is an advanced seed: '{advRadial.IsChecked}'\n";
+            this.text += $"Is an advanced seed: '{!basicRadial.IsChecked}'\n";
 
-            this.text += "Got the seed info, beginning item mapping!";
+            this.text += "Got the seed info, beginning item mapping!\n\n\n";
 
+            //Generate seed
+            int seedNum = RandomizerGenerator.GenerateSeed();
+            SeedType seedType = (bool)logicEngineCheckBox.IsChecked ? SeedType.Logic : SeedType.No_Logic;
+            
+            Dictionary<SettingType, SettingValue> settings = new Dictionary<SettingType, SettingValue>();
+            SettingValue difficulty = (bool)basicRadial.IsChecked ? SettingValue.Basic : SettingValue.Advanced;
+            settings.Add(SettingType.Difficulty, difficulty);
+
+            SeedRO seed = new SeedRO(seedNum,seedType,settings);
+            
+            //generate mappings!
+            Dictionary<LocationRO, string> mappings = RandomizerGenerator.GenerateRandomizedMappings(seed);
+
+            this.text += "Mapping complete, listing mapping now:\n";
+
+            foreach(LocationRO location in mappings.Keys)
+            {
+                this.text += $"Item '{mappings[location]}' at Location '{location.PrettyLocationName}'\n";
+            }
+
+            this.text += "Generation complete! Enjoy the game!!!";
+
+            //Set text in box
             TextBox text = (TextBox)FindName("Text");
             text.Text = this.text;
 

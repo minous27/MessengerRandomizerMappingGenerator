@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MessengerRandomizerMappingGenerator.RandomizerGeneration.Constants
+{
+    public enum SettingValue
+    {
+        //Difficulty settings
+        Basic,
+        Advanced
+    }
+}
