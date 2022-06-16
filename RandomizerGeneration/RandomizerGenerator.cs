@@ -19,10 +19,13 @@ namespace MessengerRandomizerMappingGenerator.RandomizerGeneration
         private static List<string> randomizedItems;
         private static Dictionary<LocationRO, int> coinResults;
         private static Dictionary<LocationRO, string> locationToItemMapping;
+
+        ///<summary> Used to represent all the required items to complete this seed, along with what they currently block. This is to prevent self locks.</summary>
+        private static Dictionary<string, HashSet<string>> requiredItems;
+        
         private static Random randomNumberGen;
 
-        //Used to represent all the required items to complete this seed, along with what they currently block. This is to prevent self locks. 
-        private static Dictionary<string, HashSet<string>> requiredItems = new Dictionary<string, HashSet<string>>();
+
 
         private static int REQUIRED_ITEM_PLACEMENT_ATTEMPT_LIMIT = 10;
 
@@ -51,6 +54,7 @@ namespace MessengerRandomizerMappingGenerator.RandomizerGeneration
             randomizedItems = new List<string>();
             coinResults = new Dictionary<LocationRO, int>();
             locationToItemMapping = new Dictionary<LocationRO, string>();
+            requiredItems = new Dictionary<string, HashSet<string>>();
 
             //We now have a seed. Let's initialize our locations and items lists.
             randomizedLocations = RandomizerConstants.GetRandoLocationList();
@@ -70,12 +74,28 @@ namespace MessengerRandomizerMappingGenerator.RandomizerGeneration
             //Get our randomizer set up
             randomNumberGen = new Random(seed.Seed);
 
+
             //Begin filling out the mappings. Both collections need to logically be the same size.
-            if (randomizedLocations.Count != randomizedItems.Count)
+
+            if (randomizedLocations.Count > randomizedItems.Count)
+            {
+                //During advanced item placement, there will be more locations than items. Fill in the rest of the spots with trash items.
+                int difference = randomizedLocations.Count - randomizedItems.Count;
+
+                for (int i = 0; i < difference; i++)
+                {
+                    randomizedItems.Add("Time_Shard");
+                }
+            }
+
+            if (randomizedLocations.Count < randomizedItems.Count)
             {
                 //This check is here to make sure nothing was missed during development and check/item counts remain consistent. This should never break during typical usage and should only happen when changes to the logic engine are occurring.
                 throw new RandomizerException($"Mismatched number of items between randomized items({randomizedItems.Count}) and checks({randomizedLocations.Count}). Minous needs to correct this so the world can work again...");
             }
+            
+            
+
 
             //Let the mapping flows begin!
             switch (seed.SeedType)

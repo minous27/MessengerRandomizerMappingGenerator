@@ -69,18 +69,27 @@ namespace MessengerRandomizerMappingGenerator
             settings.Add(SettingType.Difficulty, difficulty);
 
             SeedRO seed = new SeedRO(seedNum,seedType,settings);
-            
-            //generate mappings!
-            Dictionary<LocationRO, string> mappings = RandomizerGenerator.GenerateRandomizedMappings(seed);
 
-            this.text += "Mapping complete, listing mapping now:\n";
-
-            foreach(LocationRO location in mappings.Keys)
+            try
             {
-                this.text += $"Item '{mappings[location]}' at Location '{location.PrettyLocationName}'\n";
+                //generate mappings!
+                Dictionary<LocationRO, string> mappings = RandomizerGenerator.GenerateRandomizedMappings(seed);
+
+                this.text += "Mapping complete, listing mapping now:\n";
+
+                foreach (LocationRO location in mappings.Keys)
+                {
+                    this.text += $"Item '{mappings[location]}' at Location '{location.PrettyLocationName}'\n";
+                }
+
+                this.text += "Generation complete! Enjoy the game!!!";
+            }
+            catch(Exception ex)
+            {
+                this.text = $"An error occurred during generation: {ex.Message}\nPlease try again.";
             }
 
-            this.text += "Generation complete! Enjoy the game!!!";
+            
 
             //Set text in box
             TextBox text = (TextBox)FindName("Text");
