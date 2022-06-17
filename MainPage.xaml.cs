@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using System.Text.Json;
+using System.Text;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -68,26 +69,40 @@ namespace MessengerRandomizerMappingGenerator
                 this.text += "Mapping complete, listing mapping now:\n";
 
                 //Take the mapping I have and turn it into something nice and usable.
-                MappingJsonRO mappingJson = new MappingJsonRO();
-                mappingJson.Mappings = new Dictionary<string, string>();
+                StringBuilder mappingText = new StringBuilder("mappings=");
 
                 foreach (LocationRO location in mappings.Keys)
                 {
                     this.text += $"Item '{mappings[location]}' at Location '{location.PrettyLocationName}'\n";
 
-                    mappingJson.Mappings.Add(location.LocationName, mappings[location]);
+                    mappingText.Append(location.LocationName + "-" + mappings[location] + ",");
                 }
+                //Shave off trailing comma
+                mappingText.Length--;
 
-                mappingJson.Settings = settings;
-                mappingJson.SeedType = seedType;
+                mappingText.Append("|");
 
-                //JSON parsing
-                var options = new JsonSerializerOptions{ WriteIndented = true };
-                string mappingJsonString = JsonSerializer.Serialize(mappingJson, options);
+                foreach (SettingType settingType in settings.Keys)
+                {
+                    mappingText.Append(settingType + "=" + settings[settingType] + ",");
+                }
+               
+                //Shave off trailing comma
+                mappingText.Length--;
 
-                this.text += mappingJsonString + "\n";
+                mappingText.Append("|");
 
-                Windows.Storage.StorageFolder installedLocation = Windows.ApplicationModel.Package.Current.InstalledLocation;
+                mappingText.Append("seedtype=" + seedType);
+
+                byte[] mappingBytes = Encoding.ASCII.GetBytes(mappingText.ToString());
+
+                string b64MappingText = Convert.ToBase64String(mappingBytes);
+
+                this.text += mappingText.ToString() + "\n";
+
+                this.text += $"Mapping bytes dump: '{mappingBytes}'\n";
+
+                this.text += $"Mapping after encoding: '{b64MappingText}'\n";
 
                 this.text += "\nGeneration complete! Enjoy the game!!!";
             }
