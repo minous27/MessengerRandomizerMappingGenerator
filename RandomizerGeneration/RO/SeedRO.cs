@@ -1,9 +1,7 @@
 ﻿using MessengerRandomizerMappingGenerator.RandomizerGeneration.Constants;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+
 
 namespace MessengerRandomizerMappingGenerator.RandomizerGeneration.RO
 {
@@ -71,7 +69,7 @@ namespace MessengerRandomizerMappingGenerator.RandomizerGeneration.RO
             collectedItemsSB.Append("CollectedItems:'");
             settingsSB.Append("'");
 
-            return $"{Seed}|{SeedType}|{settingsSB.ToString()}|{collectedItemsSB.ToString()}|";
+            return $"{Seed}|{SeedType}|{settingsSB.ToString()}";
         }
 
         public override bool Equals(object obj)

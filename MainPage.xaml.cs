@@ -3,18 +3,9 @@ using MessengerRandomizerMappingGenerator.RandomizerGeneration.Constants;
 using MessengerRandomizerMappingGenerator.RandomizerGeneration.RO;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
+using System.Text.Json;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -26,8 +17,7 @@ namespace MessengerRandomizerMappingGenerator
     public sealed partial class MainPage : Page
     {
 
-        private string text = "";
-        
+        private string text = "";        
 
         public MainPage()
         {
@@ -47,7 +37,7 @@ namespace MessengerRandomizerMappingGenerator
 
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
             this.text = "Generation starting up...\n";
 
@@ -77,17 +67,37 @@ namespace MessengerRandomizerMappingGenerator
 
                 this.text += "Mapping complete, listing mapping now:\n";
 
+                //Take the mapping I have and turn it into something nice and usable.
+                MappingJsonRO mappingJson = new MappingJsonRO();
+                mappingJson.Mappings = new Dictionary<string, string>();
+
                 foreach (LocationRO location in mappings.Keys)
                 {
                     this.text += $"Item '{mappings[location]}' at Location '{location.PrettyLocationName}'\n";
+
+                    mappingJson.Mappings.Add(location.LocationName, mappings[location]);
                 }
 
-                this.text += "Generation complete! Enjoy the game!!!";
+                mappingJson.Settings = settings;
+                mappingJson.SeedType = seedType;
+
+                //JSON parsing
+                var options = new JsonSerializerOptions{ WriteIndented = true };
+                string mappingJsonString = JsonSerializer.Serialize(mappingJson, options);
+
+                this.text += mappingJsonString + "\n";
+
+                Windows.Storage.StorageFolder installedLocation = Windows.ApplicationModel.Package.Current.InstalledLocation;
+
+                this.text += "\nGeneration complete! Enjoy the game!!!";
             }
             catch(Exception ex)
             {
                 this.text = $"An error occurred during generation: {ex.Message}\nPlease try again.";
             }
+
+
+           
 
             
 
